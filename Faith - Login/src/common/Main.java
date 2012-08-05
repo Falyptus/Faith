@@ -3,91 +3,132 @@ package common;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
-import task.TaskManager;
+import org.fusesource.jansi.AnsiConsole;
 
-import link.LinkServer;
-import login.LoginServer;
+import server.GameServer;
+import server.LinkServer;
+import server.RconServer;
+import server.task.Task;
+
+import common.console.Console;
+import common.utils.Utils;
 
 public class Main {
-
+	
+	public static PrintStream printStream;
+	
+	public static GameServer gameServer;
+	public static RconServer rconServer;
+	public static LinkServer linkServer;
+	public static Task taskManager;
+	
 	public static boolean isInit = false;
 	public static boolean isRunning = false;
-	
-	public static LoginServer loginServer;
-	public static LinkServer linkServer;
-	public static TaskManager taskManager;
-	
-	public static int REQUIRE_LVL;
-	public static char STATE;
-	public static boolean isVIP;
+	public static boolean isSaving = false;
+	public static boolean linkIsRunning = false;
+	public static boolean tryLinking = false;
 	
 	static {
-		Runtime.getRuntime().addShutdownHook(new Thread() 
-		{
+		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
-			public void run() 
-			{
-				closeServers();
+			public void run() {
+				AnsiConsole.systemUninstall();
+				Main.closeServers();
 			}
 		});
 	}
 	
-	public static void main(final String[] args) 
+	public static void main(final String[] args)
 	{
+		final long begin = System.currentTimeMillis();
+		
+		AnsiConsole.systemInstall();
+		
+		Utils.changeTitle(Config.SERVER_ID, 'L', true);
+		
 		try {
 	        System.setOut(new PrintStream(System.out, true, "IBM850"));
         } catch (final UnsupportedEncodingException e) {
 	        e.printStackTrace();
         }
-		System.out.println(" _______  _______ __________________");
-		System.out.println("(  ____ \\(  ___  )\\__   __/\\__   __/|\\     /|");
-		System.out.println("| (    \\/| (   ) |   ) (      ) (   | )   ( |");
-		System.out.println("| (__    | (___) |   | |      | |   | (___) |");
-		System.out.println("|  __)   |  ___  |   | |      | |   |  ___  |");
-		System.out.println("| (      | (   ) |   | |      | |   | (   ) |");
-		System.out.println("| )      | )   ( |___) (___   | |   | )   ( |");
-		System.out.println("|/       |/     \\|\\_______/   )_(   |/     \\|   for Fenrys");
-		System.out.println("LoginServer v"+Config.LOGIN_VERSION);
-		System.out.println("Dofus v"+Config.CLIENT_VERSION);
+		
+		Console.printDefault(" _______  _______ __________________\n");
+		Console.printDefault("(  ____ \\(  ___  )\\__   __/\\__   __/|\\     /|\n");
+	    Console.printDefault("| (    \\/| (   ) |   ) (      ) (   | )   ( |\n");
+		Console.printDefault("| (__    | (___) |   | |      | |   | (___) |\n");
+		Console.printDefault("|  __)   |  ___  |   | |      | |   |  ___  |\n");
+		Console.printDefault("| (      | (   ) |   | |      | |   | (   ) |\n");
+		Console.printDefault("| )      | )   ( |___) (___   | |   | )   ( |\n");
+		Console.printDefault("|/       |/     \\|\\_______/   )_(   |/     \\|   for Fenrys\n");
+		Console.printlnDefault("GameServer v"+Constants.SERVER_VERSION);
+		Console.printlnDefault("Dofus v"+Constants.CLIENT_VERSION);
+		Console.printlnDefault("Credit to diabu, marthieubean, deathdown, elbusta, developped by Keal" + '\n');
 		
 		Config.loadConfiguration();
-		System.out.println("Configuration file readed.");
+		Console.printlnDefault("Configuration file readed.");
 		
 		isInit = true;
 		
-		if (SQLManager.setUpConnexion())
+		if(SQLManager.setUpConnexion())
 		{
-			System.out.println("Connected to database !");
+			Console.printlnDefault("Connected to database.");
 		}
-		else 
+		else
 		{
-			System.out.println("Invalid connection !");
-			closeServers();
-		}
+			Console.printlnError("Invalid connection !");
+			Main.closeServers();
+			return;
+		}		
+		World.createWorld();
 		
-		World.loadRealm();
+		isRunning = true;
 		
-		loginServer = new LoginServer();
-		System.out.println("Login server started on port "+Config.LOGIN_PORT);
+		gameServer = new GameServer();
+		gameServer.start();
+		Console.printlnDefault("Game server started on port "+Config.CONFIG_GAME_PORT);	
 		
 		linkServer = new LinkServer();
-		System.out.println("Link server started on port "+Config.LINK_PORT);
+		Console.printlnDefault("Link server started on port "+Config.CONFIG_LINK_PORT);
 		
-		taskManager = new TaskManager();
+		//rconServer = new RconServer();
+		//Console.printlnDefault("Administration server started on port "+Config.CONFIG_RCON_PORT);
+		
+		taskManager = new Task();
 		taskManager.initTasks();
-		
-		World._state = STATE;
-		World._Requirelevel = REQUIRE_LVL;
-		System.out.println("Waiting for gameservers...");
+				
+		Console.printlnDefault("Waiting for connections...");
+		Console.printlnDefault("Core loaded in "+((System.currentTimeMillis() - begin) / 1000)+" seconds.");
+		Utils.changeTitle(Config.SERVER_ID, 'O', false);
+	}
+	
+	public static void tryLinkServer() {
+		if(!tryLinking) {
+			tryLinking = true;
+			Console.printlnDefault("Try to make a new link with LoginServer");
+			while(!linkIsRunning) {
+				linkServer = new LinkServer();
+				try {
+					Thread.sleep(15000);
+				} catch (InterruptedException e) {}
+			}
+			tryLinking = false;
+			Console.printlnDefault("LoginServer and GameServer are successfully linked !");
+		}
 	}
 	
 	public static void closeServers()
 	{
-		if (isRunning) 
+		Console.printlnError("Stop server asked");
+		if(isRunning)
 		{
-			loginServer.kickAll();
 			isRunning = false;
-			System.out.println("LoginServer stopped successfully !");
+			World.saveAll(null);
+			gameServer.kickAll();
+			rconServer.kickAll();
+			SQLManager.closeCons();
 		}
+		Console.printlnError("Server is stopped");
+		Console.clear();
+		isRunning = false;
 	}
 }

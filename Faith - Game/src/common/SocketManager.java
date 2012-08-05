@@ -2130,6 +2130,15 @@ public class SocketManager {
 		final String packet = "Im116;"+str;
 		send(player, packet);
     }
+	
+	public static void GAME_SEND_IM_116_TO_ALL(final String arg0, final String arg1) {
+		final String packet = "Im116;"+arg0+"~"+arg1;
+		for(Player player : World.getOnlinePersos()) {
+			if(player != null && player.isOnline()) {
+				send(player, packet);
+			}
+		}
+    }
 
 	public static void GAME_SEND_ITEM_LIST_PACKET_SELLER(final Player p, final Player out)
 	{

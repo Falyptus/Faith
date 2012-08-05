@@ -3,7 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import action.ActionThread;
+import server.client.RconThread;
 
 import common.Config;
 import common.Main;
@@ -34,7 +34,7 @@ public class RconServer implements Runnable {
 		{
 			try
 			{
-				new ActionThread(serverSocket.accept());
+				new RconThread(serverSocket.accept());
 			}catch(final IOException e)
 			{
 				try

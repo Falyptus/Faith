@@ -82,7 +82,7 @@ public class RconThread implements Runnable {
 	private void parsePacket(final String packet) { //TODO: Add some action... :)
 		if(packet.isEmpty())
 			return;
-		final String[] packets = packet.substring(2).split(":");
+		final String[] data = packet.substring(2).split(":");
 		if(packet.startsWith("AU"))//Authentification...
 		{
 			if(Config.CONFIG_KEY_RCON == packet.substring(2))
@@ -94,68 +94,66 @@ public class RconThread implements Runnable {
 		{
 			if(!allowExecute)
 			{
-				System.out.println(new StringBuilder("Rcon: IP ").append(socket.getInetAddress().getHostAddress()).append(" is not allowed to execute cmd").toString());
+				System.out.println("Rcon: IP "+socket.getInetAddress().getHostAddress()+" is not allowed to execute cmd");
 				return;
 			}
-			if(packets[0].equalsIgnoreCase("save"))
+			if(data[0].equalsIgnoreCase("save"))
 			{
 				if(!Main.isSaving)
 				{
 					SocketManager.GAME_SEND_Im_PACKET_TO_ALL("1164");
-					System.out.println(new StringBuilder("Sauvegarde lancée !").toString());
+					System.out.println("Save is running !");
 					World.saveAll(null);
-					System.out.println(new StringBuilder("Sauvegarde finie !").toString());
+					System.out.println("Save is finish !");
 					SocketManager.GAME_SEND_Im_PACKET_TO_ALL("1165");
 				}
 				else
 				{
-					System.out.println(new StringBuilder("Une instance de sauvegarde est déjà lancée !").toString());
+					System.out.println("An instance of save is currently running !");
 					return;
 				}
 			}
-			else if(packets[0].equalsIgnoreCase("reboot"))
+			else if(data[0].equalsIgnoreCase("reboot"))
 			{
 				parsePacket("WIsave"); //We save the world
-				System.exit(0); //We exit the VM
+				Main.closeServers();
 			}
-			else if(packets[0].equalsIgnoreCase("kick"))
+			else if(data[0].equalsIgnoreCase("kick"))
 			{
-				final Player temp = World.getPersoByName(packets[1]);
+				final Player temp = World.getPersoByName(data[1]);
 				if(temp == null)
 				{
-					System.out.println(new StringBuilder("Personnage non chargé !").toString());
+					System.out.println("Character not loaded !");
 					return;
 				}
-				//SocketManager.REALM_SEND_KICKED(temp.get_compte().getGameThread().get_out());
 				temp.getAccount().getGameThread().kick();
-				System.out.println(new StringBuilder("Personnage kick !").toString());
+				System.out.println("Character kick !");
 			}
-			else if(packets[0].equalsIgnoreCase("ban"))
+			else if(data[0].equalsIgnoreCase("ban"))
 			{
-				final Player temp = World.getPersoByName(packets[1]);
+				final Player temp = World.getPersoByName(data[1]);
 				if(temp == null)
 				{
-					System.out.println(new StringBuilder("Personnage non chargé !").toString());
+					System.out.println("Character not loaded !");
 					return;
 				}
 				temp.getAccount().setBanned(true);
-				//SocketManager.REALM_SEND_BANNED(temp.get_compte().getGameThread().get_out());
 				SQLManager.UPDATE_ACCOUNT_DATA(temp.getAccount());
 				temp.getAccount().getGameThread().kick();
-				System.out.println(new StringBuilder("Personnage banni !").toString());
+				System.out.println("Character banned !");
 			}
-			else if(packets[0].equalsIgnoreCase("announce"))
+			else if(data[0].equalsIgnoreCase("announce"))
 			{
-				SocketManager.GAME_SEND_MESSAGE_TO_ALL((new StringBuilder("(Rcon System) : ")).append(packets[1]).toString(), Config.CONFIG_MOTD_COLOR);
+				SocketManager.GAME_SEND_IM_116_TO_ALL("(Rcon System)", data[1]);
 			}
 			else
 			{
-				System.out.println(new StringBuilder("Rcon: IP ").append(socket.getInetAddress().getHostAddress()).append(" send an unknow packet ").append(packet).toString());
+				System.out.println("Rcon: IP "+socket.getInetAddress().getHostAddress()+" send an unknown action "+data[0]);
 			}
 	    }
 		else
 		{
-			System.out.println(new StringBuilder("Rcon: IP ").append(socket.getInetAddress().getHostAddress()).append(" send an unknow packet ").append(packet).toString());
+			System.out.println("Rcon: IP "+socket.getInetAddress().getHostAddress()+" send an unknown packet "+packet);
 		}
     }
 }

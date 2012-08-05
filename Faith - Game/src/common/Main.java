@@ -3,14 +3,12 @@ package common;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
-
 import org.fusesource.jansi.AnsiConsole;
 
 import server.GameServer;
 import server.LinkServer;
 import server.RconServer;
 import server.task.Task;
-import action.ActionServer;
 
 import common.console.Console;
 import common.utils.Utils;
@@ -20,7 +18,6 @@ public class Main {
 	public static PrintStream printStream;
 	
 	public static GameServer gameServer;
-	public static ActionServer actionServer;
 	public static RconServer rconServer;
 	public static LinkServer linkServer;
 	public static Task taskManager;
@@ -30,8 +27,6 @@ public class Main {
 	public static boolean isSaving = false;
 	public static boolean linkIsRunning = false;
 	public static boolean tryLinking = false;
-	
-	private final static Object LOCK = new Object();
 	
 	static {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -67,7 +62,7 @@ public class Main {
 		Console.printDefault("|/       |/     \\|\\_______/   )_(   |/     \\|   for Fenrys\n");
 		Console.printlnDefault("GameServer v"+Constants.SERVER_VERSION);
 		Console.printlnDefault("Dofus v"+Constants.CLIENT_VERSION);
-		Console.printlnDefault("Credit to marthieubean, created by Keal" + '\n');
+		Console.printlnDefault("Credit to marthieubean, developped by Keal" + '\n');
 		
 		Config.loadConfiguration();
 		Console.printlnDefault("Configuration file readed.");
@@ -88,22 +83,19 @@ public class Main {
 		
 		isRunning = true;
 		
-		gameServer = new GameServer();//Config.IP);
+		gameServer = new GameServer();
 		gameServer.start();
 		Console.printlnDefault("Game server started on port "+Config.CONFIG_GAME_PORT);	
 		
 		linkServer = new LinkServer();
 		Console.printlnDefault("Link server started on port "+Config.CONFIG_LINK_PORT);
 		
+		//rconServer = new RconServer();
+		//Console.printlnDefault("Administration server started on port "+Config.CONFIG_RCON_PORT);
+		
 		taskManager = new Task();
 		taskManager.initTasks();
-		
-		/*if(CONFIG_RCON_PORT != -1)
-		{
-			rconServer = new RconServer();
-			Console.printSuccess("Administration server started on port "+CONFIG_RCON_PORT);
-		}*/
-		
+				
 		Console.printlnDefault("Waiting for connections...");
 		Console.printlnDefault("Core loaded in "+((System.currentTimeMillis() - begin) / 1000)+" seconds.");
 		Utils.changeTitle(Config.SERVER_ID, 'O', false);
@@ -126,20 +118,17 @@ public class Main {
 	
 	public static void closeServers()
 	{
-		synchronized(LOCK) {
-			Console.printlnError("Stop server asked");
-			if(isRunning)
-			{
-				isRunning = false;
-				World.saveAll(null);
-				Main.gameServer.kickAll();
-				actionServer.kickAll();		//MARTHIEUBEAN
-				rconServer.kickAll();
-				SQLManager.closeCons();
-			}
-			Console.printlnError("Server is stopped");
-			Console.clear();
+		Console.printlnError("Stop server asked");
+		if(isRunning)
+		{
 			isRunning = false;
+			World.saveAll(null);
+			gameServer.kickAll();
+			rconServer.kickAll();
+			SQLManager.closeCons();
 		}
+		Console.printlnError("Server is stopped");
+		Console.clear();
+		isRunning = false;
 	}
 }
