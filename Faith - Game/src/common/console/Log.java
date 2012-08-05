@@ -15,11 +15,11 @@ public class Log {
 	public static BufferedWriter logRcon;
 	public static boolean canLog;
 	
-	private final static Object SINGLETON_LOCK = new Object();
+	private final static Object LOCK = new Object();
 	
 	public static void addToLog(final String str)
 	{
-		synchronized(SINGLETON_LOCK) {
+		synchronized(LOCK) {
 			Console.printlnDefault(str);
 			if(canLog)
 			{
@@ -35,7 +35,7 @@ public class Log {
 
 	public static void addToErrorLog(final String str)
 	{
-		synchronized(SINGLETON_LOCK) {
+		synchronized(LOCK) {
 			Console.printlnError(str);
 			if(canLog)
 			{
@@ -51,7 +51,7 @@ public class Log {
 
 	public static void addToSockLog(final String str)
 	{
-		synchronized(SINGLETON_LOCK) {
+		synchronized(LOCK) {
 			Console.printlnDefault(str);
 			//if(Ancestra.CONFIG_DEBUG)System.out.println(str);
 			if(canLog)
@@ -68,7 +68,7 @@ public class Log {
 	
 	public static void addToMjLog(final String str)
 	{
-		synchronized(SINGLETON_LOCK) {
+		synchronized(LOCK) {
 			if(!Log.canLog)return;
 			final String date = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+Calendar.getInstance().get(+Calendar.MINUTE)+":"+Calendar.getInstance().get(Calendar.SECOND);
 			try {
@@ -81,7 +81,7 @@ public class Log {
 	
 	public static void addToShopLog(final String str)
 	{
-		synchronized(SINGLETON_LOCK) {
+		synchronized(LOCK) {
 			if(!Log.canLog)return;
 			final String date = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+Calendar.getInstance().get(+Calendar.MINUTE)+":"+Calendar.getInstance().get(Calendar.SECOND);
 			try {
@@ -94,7 +94,7 @@ public class Log {
 	
 	public static void addToRconLog(final String str)
 	{
-		synchronized(SINGLETON_LOCK) {
+		synchronized(LOCK) {
 			if(!Log.canLog)return;
 			final String date = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+Calendar.getInstance().get(+Calendar.MINUTE)+":"+Calendar.getInstance().get(Calendar.SECOND);
 			try {
