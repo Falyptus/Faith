@@ -52,26 +52,26 @@ public class Main {
 	        e.printStackTrace();
         }
 		
-		Console.printDefault(" _______  _______ __________________\n");
-		Console.printDefault("(  ____ \\(  ___  )\\__   __/\\__   __/|\\     /|\n");
-	    Console.printDefault("| (    \\/| (   ) |   ) (      ) (   | )   ( |\n");
-		Console.printDefault("| (__    | (___) |   | |      | |   | (___) |\n");
-		Console.printDefault("|  __)   |  ___  |   | |      | |   |  ___  |\n");
-		Console.printDefault("| (      | (   ) |   | |      | |   | (   ) |\n");
-		Console.printDefault("| )      | )   ( |___) (___   | |   | )   ( |\n");
-		Console.printDefault("|/       |/     \\|\\_______/   )_(   |/     \\|   for Fenrys\n");
-		Console.printlnDefault("GameServer v"+Constants.SERVER_VERSION);
-		Console.printlnDefault("Dofus v"+Constants.CLIENT_VERSION);
-		Console.printlnDefault("Credit to marthieubean, developped by Keal" + '\n');
+		System.out.println(" _______  _______ __________________");
+		System.out.println("(  ____ \\(  ___  )\\__   __/\\__   __/|\\     /|");
+		System.out.println("| (    \\/| (   ) |   ) (      ) (   | )   ( |");
+		System.out.println("| (__    | (___) |   | |      | |   | (___) |");
+		System.out.println("|  __)   |  ___  |   | |      | |   |  ___  |");
+		System.out.println("| (      | (   ) |   | |      | |   | (   ) |");
+		System.out.println("| )      | )   ( |___) (___   | |   | )   ( |");
+		System.out.println("|/       |/     \\|\\_______/   )_(   |/     \\|   for Fenrys");
+		System.out.println("GameServer v"+Constants.SERVER_VERSION);
+		System.out.println("Dofus v"+Constants.CLIENT_VERSION);
+		System.out.println("Credit to diabu, marthieubean, deathdown, elbusta, developped by Keal" + '\n');
 		
 		Config.loadConfiguration();
-		Console.printlnDefault("Configuration file readed.");
+		System.out.println("Configuration file readed.");
 		
 		isInit = true;
 		
 		if(SQLManager.setUpConnexion())
 		{
-			Console.printlnDefault("Connected to database.");
+			System.out.println("Connected to database.");
 		}
 		else
 		{
@@ -85,34 +85,31 @@ public class Main {
 		
 		gameServer = new GameServer();
 		gameServer.start();
-		Console.printlnDefault("Game server started on port "+Config.CONFIG_GAME_PORT);	
+		System.out.println("Game server started on port "+Config.CONFIG_GAME_PORT);	
 		
 		linkServer = new LinkServer();
-		Console.printlnDefault("Link server started on port "+Config.CONFIG_LINK_PORT);
+		System.out.println("Link server started on port "+Config.CONFIG_LINK_PORT);
 		
 		//rconServer = new RconServer();
-		//Console.printlnDefault("Administration server started on port "+Config.CONFIG_RCON_PORT);
+		//System.out.println("Administration server started on port "+Config.CONFIG_RCON_PORT);
 		
 		taskManager = new Task();
 		taskManager.initTasks();
 				
-		Console.printlnDefault("Waiting for connections...");
-		Console.printlnDefault("Core loaded in "+((System.currentTimeMillis() - begin) / 1000)+" seconds.");
+		System.out.println("Waiting for connections...");
+		System.out.println("Core loaded in "+((System.currentTimeMillis() - begin) / 1000)+" seconds.");
 		Utils.changeTitle(Config.SERVER_ID, 'O', false);
 	}
 	
 	public static void tryLinkServer() {
 		if(!tryLinking) {
 			tryLinking = true;
-			Console.printlnDefault("Try to make a new link with LoginServer");
+			System.out.println("Try to make a new link with LoginServer");
 			while(!linkIsRunning) {
 				linkServer = new LinkServer();
-				try {
-					Thread.sleep(15000);
-				} catch (InterruptedException e) {}
 			}
 			tryLinking = false;
-			Console.printlnDefault("LoginServer and GameServer are successfully linked !");
+			System.out.println("LoginServer and GameServer are successfully linked !");
 		}
 	}
 	

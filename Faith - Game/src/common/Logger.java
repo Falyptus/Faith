@@ -12,14 +12,14 @@ import common.console.Log;
 /**
  * 
  * Class de gestion d'écriture de logs dans un fichier
- * @author Mathieu optimized by Keal
+ * @author Mathieu
  */
 public class Logger{
 	
-	transient private BufferedWriter out;
+	private BufferedWriter out;
 	
 	private ArrayList<String> toWrite;
-	transient private int bufferSize;
+	private int bufferSize;
 	
 	/**
 	 * 
@@ -54,13 +54,12 @@ public class Logger{
 	 */
 	public void toWrite(final String toAdd)
 	{	
-		final String l_toAdd = toAdd;
 		if(!Log.canLog || out == null) {
 			return;
 		}
 
 		final String date = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)+":"+Calendar.getInstance().get(+Calendar.MINUTE)+":"+Calendar.getInstance().get(Calendar.SECOND);
-		toWrite.add(date + ": " + l_toAdd);
+		toWrite.add(date + ": " + toAdd);
 		if(toWrite.size() >= bufferSize) {
 			write();
 		}
@@ -132,13 +131,12 @@ public class Logger{
 	 */
 	public void setBufferSize(final int newSize)
 	{
-		final int l_newSize = newSize;
 		
 		if(bufferSize <= 0) {
 			bufferSize = 20;
 		}
 		
-		this.bufferSize = l_newSize;
+		this.bufferSize = newSize;
 	}
 	
 }

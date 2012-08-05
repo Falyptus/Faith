@@ -986,7 +986,7 @@ public class World {
 		
 		Console.printlnDebug("Loading other contents...");
 		loadNicknames();
-		Console.printlnDefault("World created !");
+		System.out.println("World created !");
 		
 		nextItemID = SQLManager.getNextObjetID();
 	}
