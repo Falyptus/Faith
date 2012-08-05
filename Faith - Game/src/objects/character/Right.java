@@ -17,14 +17,11 @@ public class Right {
 	private boolean CAN_ATTACK_MONSTERS_ANYWHERE_WHEN_MUTANT;
 	private boolean CANT_INTERACT_WITH_PRISM;
 	
-	private int rights;
-
 	public Right() {
 
 	}
 
 	public Right(int rights) {
-		this.rights = rights;
 		CAN_ASSAULT = (rights & 1) != 1;
 		CAN_CHALLENGE = (rights & 2) != 2;
 		CAN_EXCHANGE = (rights & 4) != 4;
@@ -73,7 +70,6 @@ public class Right {
 		if (!CANT_INTERACT_WITH_PRISM)
 			rights += 32768;
 
-		this.rights = rights;
 		return rights;
 	}
 
